@@ -1,73 +1,147 @@
-# React + TypeScript + Vite
+# VisualRoute
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+VisualRoute is an interactive pathfinding visualization tool built on real-world road networks. It combines OpenStreetMap data with classical and advanced routing algorithms, enabling dynamic exploration of how different strategies behave on actual maps.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## How It Works
 
-## React Compiler
+1. The frontend requests graph data using latitude and longitude.
+2. The backend generates a road network graph using OSMnx.
+3. The graph is processed into nodes and edges with weights such as distance, travel time, and risk.
+4. The data is served to the frontend and rendered using MapLibre GL.
+5. Users select start and end nodes directly on the map.
+6. Selected algorithms run in a Web Worker and stream step-by-step updates.
+7. The map visualizes:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+   * Visited nodes
+   * Frontier expansion
+   * Final computed path
+   * Multi-objective routes (fastest, shortest, safest)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* Real-world graph generation from OpenStreetMap
+* Interactive map with node selection
+* Step-by-step algorithm visualization
+* Multiple routing strategies and categories
+* Multi-objective routing (distance, time, safety)
+* Dynamic graph reloading on map movement
+* Web Worker-based algorithm execution for smooth UI
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Algorithms Used
+
+| Name                    | Approach Type                   | Category      |
+| ----------------------- | ------------------------------- | ------------- |
+| BFS                     | Unweighted traversal            | Core          |
+| DFS                     | Unweighted traversal            | Core          |
+| Dijkstra                | Distance-dependent              | Core          |
+| Bellman-Ford            | Distance-dependent              | Core          |
+| Greedy Best-First       | Heuristic-based                 | Heuristic     |
+| A*                      | Heuristic + distance            | Heuristic     |
+| Bidirectional Search    | Heuristic-based                 | Heuristic     |
+| Floyd-Warshall          | Distance-dependent (all-pairs)  | All-Pairs     |
+| Johnson's               | Distance-dependent (reweighted) | All-Pairs     |
+| Contraction Hierarchies | Optimization-based              | Optimization  |
+| ALT (A* + Landmarks)    | Heuristic + preprocessing       | Optimization  |
+| Hub Labeling            | Precomputed lookup              | Optimization  |
+| Bidirectional Dijkstra  | Distance-dependent              | Optimization  |
+| Goal-Directed Search    | Heuristic-based                 | Optimization  |
+| Time-Dependent Dijkstra | Time-dependent                  | Dynamic       |
+| D* Lite                 | Dynamic replanning              | Dynamic       |
+| Yen's k-Shortest        | Multi-path (distance)           | Multi-Path    |
+| Multi-Criteria Routing  | Hybrid (distance/time/risk)     | Multi-Path    |
+| Distance Vector (RIP)   | Distributed                     | Distributed   |
+| Link-State (OSPF)       | Distributed                     | Distributed   |
+| Path Vector (BGP)       | Policy-based                    | Distributed   |
+| Genetic Algorithm       | Metaheuristic                   | Metaheuristic |
+| Ant Colony Optimization | Metaheuristic                   | Metaheuristic |
+| RL Routing              | Learning-based                  | Learning      |
+
+---
+
+## Tech Stack
+
+**Frontend**
+
+* React (TypeScript)
+* MapLibre GL
+* Vite
+
+**Backend**
+
+* Python
+* Flask
+* OSMnx
+
+---
+
+## Project Structure
+
+```
+VisualRoute/
+├── public/
+├── src/
+│   ├── components/
+│   ├── algorithms/
+│   ├── workers/
+│   ├── utils/
+│   ├── scripts/
+│   └── types/
+├── server.py
+├── package.json
+└── README.md
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Developer Setup
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Clone Repository
+
 ```
+git clone https://github.com/OrangeSorbet/VisualRoute.git
+cd VisualRoute
+```
+
+---
+
+### Install Dependencies
+
+```
+npm install
+pip install osmnx flask requests
+```
+
+---
+
+### Run the Application
+
+```
+npm run dev
+```
+
+This command starts both:
+
+* Frontend (Vite)
+* Backend (Flask)
+
+---
+
+## Usage
+
+* Select an algorithm from the control panel
+* Choose start and end nodes on the map
+* Run, pause, or reset the visualization
+* Adjust simulation speed
+* Observe how different algorithms explore and compute routes in real time
+
+---
+
+## License
+
+MIT License
